@@ -17,110 +17,139 @@ import java.util.Set;
 
 public class PageRank {
 
-	private static final String NOMBRE_ARCHIVO = "dataset.txt";
-	private static final double PROBABILIDAD_TELEPORTACION = 0.85;
-	private static final int ITERACIONES_METODO_POTENCIA = 4;
-	private static int NUMERO_DE_NODOS = 875713;
-	
-	public static void main(String[] args) throws Exception {
-		Map<Integer,List<Integer>> conexionNodos = new HashMap<>();
-		Set<Integer> rastreoNodos = new HashSet<>();
-		
-		FileReader in = new FileReader(NOMBRE_ARCHIVO);
-		BufferedReader br = new BufferedReader(in);
-		
-		String line = null;
-		while((line = br.readLine()) != null){
-			String[] splits = line.split("\t");
-			
-			int x = Integer.parseInt(splits[0]);
-			int y = Integer.parseInt(splits[1]);
-			
-			if(conexionNodos.containsKey(x)){
-				conexionNodos.get(x).add(y);
-			}else{
-				List<Integer> l = new ArrayList<>();
-				l.add(y);
-				conexionNodos.put(x, l);
-			}
-			
-			rastreoNodos.add(x);
-			rastreoNodos.add(y);
-		}
-		br.close();
-		
-		NUMERO_DE_NODOS = rastreoNodos.size();
-		rastreoNodos = null;
-		System.out.println("Nodos: " + NUMERO_DE_NODOS);
-		
-		Map<Integer, Map<Integer,Double>> matrizQ = new HashMap<>();
-		
-		for(Integer i : conexionNodos.keySet()){
-			List<Integer> list = conexionNodos.get(i);
-			int numeroEnlaces = list.size();
-                        
-			for(Integer j : list){
-				 if(matrizQ.containsKey(j)){
-//					 if(matrizQ.get(i).containsKey(key)){
-//						 matrizQ.get(i).put(key, beetaTimesM + oneMinBetaOverN);
+    private static final String NOMBRE_ARCHIVO = "dataset.txt";
+    private static final double PROBABILIDAD_TELEPORTACION = 0.85;
+    private static final int ITERACIONES_METODO_POTENCIA = 4;
+    private static int NUMERO_DE_NODOS = 875713;
+
+    public static void main(String[] args) throws Exception {
+        Map<Integer, List<Integer>> mapAristasNodo = new HashMap<>();
+        Set<Integer> setNodos = new HashSet<>();
+
+        FileReader in = new FileReader(NOMBRE_ARCHIVO);
+        BufferedReader br = new BufferedReader(in);
+
+        String line = null;
+        while ((line = br.readLine()) != null) {
+            String[] splits = line.split("\t");
+
+            int x = Integer.parseInt(splits[0]);
+            int y = Integer.parseInt(splits[1]);
+
+            if (mapAristasNodo.containsKey(x)) {
+                mapAristasNodo.get(x).add(y);
+            } else {
+                List<Integer> l = new ArrayList<>();
+                l.add(y);
+                mapAristasNodo.put(x, l);
+            }
+
+            setNodos.add(x);
+            setNodos.add(y);
+        }
+        br.close();
+
+        NUMERO_DE_NODOS = setNodos.size();
+        setNodos = null;
+        System.out.println("Nodos: " + NUMERO_DE_NODOS);
+
+        Map<Integer, Map<Integer, Double>> mapMatrizA = new HashMap<>();
+
+        double[][] matrizQ = new double[NUMERO_DE_NODOS][NUMERO_DE_NODOS];
+        double[][] matrizA = new double[NUMERO_DE_NODOS][NUMERO_DE_NODOS];
+        for (int i = 0; i < NUMERO_DE_NODOS; i++) {
+            for (int j = 0; j < NUMERO_DE_NODOS; j++) {
+                matrizQ[i][j] = 0;
+                matrizA[i][j] = 0;
+            }
+        }
+
+        for (Integer i : mapAristasNodo.keySet()) {
+            List<Integer> list = mapAristasNodo.get(i);
+            int numeroAristas = list.size();
+
+            for (Integer j : list) {
+                matrizQ[j - 1][i - 1] = 1;
+                if (mapMatrizA.containsKey(j)) {
+//					 if(mapMatrizA.get(i).containsKey(key)){
+//						 mapMatrizA.get(i).put(key, beetaTimesM + oneMinBetaOverN);
 //					 }else{
 //						 Map<Integer, Double> m = new HashMap<>();
 //						 m.put(key, beetaTimesM + oneMinBetaOverN);
-//						 matrizQ.put(i, m);
+//						 mapMatrizA.put(i, m);
 //					 }
-					 // A = BM + (1-B)/N
-					 matrizQ.get(j).put(i, (PROBABILIDAD_TELEPORTACION/numeroEnlaces) + ((1 - PROBABILIDAD_TELEPORTACION)/NUMERO_DE_NODOS));
-					 
-				 }else{
-					 Map<Integer, Double> m = new HashMap<>();
-                                         // A = BM + (1-B)/N
-					 m.put(i, (PROBABILIDAD_TELEPORTACION/numeroEnlaces) + (1 - PROBABILIDAD_TELEPORTACION)/NUMERO_DE_NODOS);
-					 matrizQ.put(j, m);
-				 }
-			}			
-		}
-		
-		System.out.println("Matrix A: " + matrizQ);
-		conexionNodos = null;
-		
-		double[] arrayR = new double[NUMERO_DE_NODOS];
-		Arrays.fill(arrayR, (1.0/NUMERO_DE_NODOS)); 
-		//NORMALIZANDO EL VECTOR R
-                
-		double[] vectorRanking = new double[NUMERO_DE_NODOS];
-		
-		for (int iteration = 0; iteration < ITERACIONES_METODO_POTENCIA; iteration++) {
-			// MULTIPLICANDO A x R (METODO POTENCIA)
-			System.out.println("Iteracion Metodo Potencia: " + (iteration + 1));
-			for (int k = 0; k < arrayR.length; k++) {
-				Map<Integer, Double> m = new HashMap<>();
-				if (matrizQ.containsKey(k)) {
-					m = matrizQ.get(k);
-				}
+                    // A = BM + (1-B)/N
+                    mapMatrizA.get(j).put(i, (PROBABILIDAD_TELEPORTACION / numeroAristas) + ((1 - PROBABILIDAD_TELEPORTACION) / NUMERO_DE_NODOS));
+                } else {
+                    Map<Integer, Double> m = new HashMap<>();
+                    // A = BM + (1-B)/N
+                    m.put(i, (PROBABILIDAD_TELEPORTACION / numeroAristas) + (1 - PROBABILIDAD_TELEPORTACION) / NUMERO_DE_NODOS);
+                    mapMatrizA.put(j, m);
+                }
+            }
+        }
 
-				double rank = 0;
-				for (int j = 0; j < arrayR.length; j++) {
-					double element = 0;
-					if (!m.containsKey(j)) {
-						element = (1.0/NUMERO_DE_NODOS) * (1 - PROBABILIDAD_TELEPORTACION);
-					} else {
-						element = m.get(j);
-					}
-					rank += element * arrayR[j];
-				}
-				vectorRanking[k] = rank;
-				rank = 0;
-                                System.out.println(vectorRanking[k]);
-			}
-			
-			arrayR = vectorRanking;
-		}
+        System.out.println("Matrix Q: ");
 
-		System.out.println("Vector Ranking: ");
-                
-                for(int i = 0;i<NUMERO_DE_NODOS;i++){
-                    System.out.println("Pagina " + (i+1) + " :" + vectorRanking[i]);
-                }	
-	}
+        for (int i = 0; i < matrizQ.length; i++) {
+            for (int j = 0; j < matrizQ[i].length; j++) {
+                System.out.print(matrizQ[i][j] + "  ");
+            }
+            System.out.println();
+        }
+
+        System.out.println("Mapeo Matrix A: " + mapMatrizA);
+        mapAristasNodo = null;
+
+        double[] arrayR = new double[NUMERO_DE_NODOS];
+        Arrays.fill(arrayR, (1.0 / NUMERO_DE_NODOS));
+        //NORMALIZANDO EL VECTOR R
+
+        double[] vectorRanking = new double[NUMERO_DE_NODOS];
+
+        for (int iteration = 0; iteration < ITERACIONES_METODO_POTENCIA; iteration++) {
+            // MULTIPLICANDO A x R (METODO POTENCIA)
+            //System.out.println("Iteracion Metodo Potencia: " + (iteration + 1));
+            for (int k = 0; k < arrayR.length; k++) {
+                Map<Integer, Double> m = new HashMap<>();
+                if (mapMatrizA.containsKey(k)) {
+                    m = mapMatrizA.get(k);
+
+                }
+
+                double rank = 0;
+                for (int j = 0; j < arrayR.length; j++) {
+                    double elementoMatriz = 0;
+                    if (!m.containsKey(j)) {
+                        elementoMatriz = (1.0 / NUMERO_DE_NODOS) * (1 - PROBABILIDAD_TELEPORTACION);
+                    } else {
+                        elementoMatriz = m.get(j);
+                        matrizA[k - 1][j - 1] = m.get(j);
+                    }
+                    rank += elementoMatriz * arrayR[j];
+                }
+                vectorRanking[k] = rank;
+                rank = 0;
+                //System.out.println(vectorRanking[k]);
+            }
+
+            arrayR = vectorRanking;
+        }
+
+        System.out.println("Matrix A: ");
+
+        for (int i = 0; i < matrizQ.length; i++) {
+            for (int j = 0; j < matrizA[i].length; j++) {
+                System.out.print(String.format( "%.2f", matrizA[i][j] ) + "  ");
+            }
+            System.out.println();
+        }
+
+        System.out.println("Vector Ranking: ");
+
+        for (int i = 0; i < NUMERO_DE_NODOS; i++) {
+            System.out.println("Pagina " + (i + 1) + " :" + vectorRanking[i]);
+        }
+    }
 
 }

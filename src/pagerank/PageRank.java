@@ -139,12 +139,9 @@ public class PageRank {
 
         for (int i = 0; i < ITERACIONES_METODO_POTENCIA; i++) {
             // MULTIPLICANDO A x R (METODO POTENCIA)
-<<<<<<< Updated upstream
             System.out.println("_________________________________");
-            System.out.println("Iteracion Metodo Potencia: " + (iteration + 1));
-=======
+            System.out.println("Iteracion Metodo Potencia: " + (i + 1));
             //System.out.println("Iteracion Metodo Potencia: " + (i + 1));
->>>>>>> Stashed changes
             for (int k = 0; k < arrayR.length; k++) {
                 Map<Integer, Double> m = new HashMap<>();
                 if (mapMatrizA.containsKey(k)) {

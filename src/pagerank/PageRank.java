@@ -1,8 +1,38 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+    # PSEUDOCODIGO #
+
+    Algoritmo PageRank
+
+    teleportacion = 0.85;
+    iteraciones = 4;
+    matrizP(nodos,nodos) = matriz binaria leida de fichero;
+    nodos = longitud matrizP;
+    matrizA(nodos,nodos) = matriz de ceros;
+    numeroAristas(nodos) = arreglo de suma de las columnas;
+
+    // Link rank y Random Walker en una sola iteracion. complejidad O(NxN)
+    For i = 0 to nodos
+            For j = 0 to nodos
+                    matrizA(i,j) = teleportacion * ( matrizP(i,j) / numeroAristas(i)) + ((1-teleportacion)/nodos);
+            End For
+    End For
+
+    arregloR(nodos) = 1/nodos  en cada posicion;
+    arregloRanking(nodos) = ceros en cada posicion;
+
+    //Iterando Power method A*R = yR. Complejidad O(NxN)
+    For i = 0 to iteraciones
+    print "Iteracion " + i
+            For j = 0 to nodos
+                    For k = 0 to nodos
+                            arregloRanking(j) = arregloRanking(j) + (matrizA(k,j) * arregloR(j));
+                    End For
+            End For
+    End For
+
+    Print arregloRanking;
  */
+
 package pagerank;
 
 import java.io.BufferedReader;
@@ -109,7 +139,8 @@ public class PageRank {
 
         for (int iteration = 0; iteration < ITERACIONES_METODO_POTENCIA; iteration++) {
             // MULTIPLICANDO A x R (METODO POTENCIA)
-            //System.out.println("Iteracion Metodo Potencia: " + (iteration + 1));
+            System.out.println("_________________________________");
+            System.out.println("Iteracion Metodo Potencia: " + (iteration + 1));
             for (int k = 0; k < arrayR.length; k++) {
                 Map<Integer, Double> m = new HashMap<>();
                 if (mapMatrizA.containsKey(k)) {
@@ -130,7 +161,7 @@ public class PageRank {
                 }
                 vectorRanking[k] = rank;
                 rank = 0;
-                //System.out.println(vectorRanking[k]);
+                System.out.println(vectorRanking[k]);
             }
 
             arrayR = vectorRanking;
@@ -140,9 +171,9 @@ public class PageRank {
 
         for (int i = 0; i < matrizQ.length; i++) {
             for (int j = 0; j < matrizA[i].length; j++) {
-                System.out.print(String.format( "%.2f", matrizA[i][j] ) + "  ");
+             //   System.out.print(String.format( "%.2f", matrizA[i][j] ) + "  ");
             }
-            System.out.println();
+           // System.out.println();
         }
 
         System.out.println("Vector Ranking: ");

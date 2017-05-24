@@ -33,57 +33,72 @@
     Print arregloRanking;
  */
 
-package pagerank;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
+import java.util.Vector;
+import java.util.BitSet;
+
+class pair < X, Y > {
+	X _first;
+	Y _second;
+	
+	public pair(X f, Y s) { _first = f; _second = s; }
+	
+	X first() { return _first; }
+	Y second() { return _second; }
+	
+	void setFirst(X f) { _first = f; }
+	void setSecond(Y s) { _second = s; }
+}
 
 public class PageRank {
 
     private static final String NOMBRE_ARCHIVO = "dataset.txt";
     private static final double PROBABILIDAD_TELEPORTACION = 0.85;
+    private static final int MAX_NODOS = 100000;
     private static final int ITERACIONES_METODO_POTENCIA = 4;
     private static int NUMERO_DE_NODOS = 875713;
+    
 
     public static void main(String[] args) throws Exception {
-        Map<Integer, List<Integer>> mapAristasNodo = new HashMap<>();
-        Set<Integer> setNodos = new HashSet<>();
+        Vector< Vector<Integer> > vectorAristasNodo = new Vector< Vector<Integer> >(MAX_NODOS);
+        Vector< Vector< pair< Integer , Double > > > vectorMatrizA = new Vector<Vector< pair< Integer,Double >>>(MAX_NODOS);
+        BitSet registroNumeros = new BitSet(MAX_NODOS);
+        registroNumeros.clear();
+        
+        for (int i = 0; i < MAX_NODOS; i++){
+        	Vector< pair< Integer , Double > > NodoMatrizA = new Vector< pair< Integer , Double > >();
+        	Vector<Integer> NodoMatrizQ = new Vector<Integer>();
+        	vectorAristasNodo.add(NodoMatrizQ);
+        	vectorMatrizA.add(NodoMatrizA);
+        }
 
         FileReader in = new FileReader(NOMBRE_ARCHIVO);
         BufferedReader br = new BufferedReader(in);
 
         String line = null;
         while ((line = br.readLine()) != null) {
-            String[] splits = line.split("\t");
+            String[] splits = line.split(" ");
 
             int x = Integer.parseInt(splits[0]);
             int y = Integer.parseInt(splits[1]);
+            vectorAristasNodo.get(x).add(y);
 
-            if (mapAristasNodo.containsKey(x)) {
-                mapAristasNodo.get(x).add(y);
-            } else {
-                List<Integer> l = new ArrayList<>();
-                l.add(y);
-                mapAristasNodo.put(x, l);
-            }
-
-            setNodos.add(x);
-            setNodos.add(y);
+            registroNumeros.set(x, true);
+            registroNumeros.set(y, true);
         }
         br.close();
 
-        NUMERO_DE_NODOS = setNodos.size();
-        setNodos = null;
+        NUMERO_DE_NODOS = 0;
+        for (int i = 0; i < MAX_NODOS; i++)
+        	if (registroNumeros.get(i) == true)
+        		NUMERO_DE_NODOS++;
+        registroNumeros = null;
         System.out.println("Nodos: " + NUMERO_DE_NODOS);
-
-        Map<Integer, Map<Integer, Double>> mapMatrizA = new HashMap<>();
 
         double[][] matrizQ = new double[NUMERO_DE_NODOS][NUMERO_DE_NODOS];
         double[][] matrizA = new double[NUMERO_DE_NODOS][NUMERO_DE_NODOS];
@@ -93,14 +108,18 @@ public class PageRank {
                 matrizA[i][j] = 0;
             }
         }
-
-        for (Integer i : mapAristasNodo.keySet()) {
-            List<Integer> list = mapAristasNodo.get(i);
-            int numeroAristas = list.size();
-
-            for (Integer j : list) {
-                matrizQ[j - 1][i - 1] = 1;
-                if (mapMatrizA.containsKey(j)) {
+        
+        for (int i = 0; i < MAX_NODOS; i++){
+        	if(vectorAristasNodo.get(i).size() < 1) continue;
+            Vector<Integer> lista = vectorAristasNodo.get(i);
+            int numeroAristas = lista.size();
+            Iterator<Integer> iterador = lista.iterator();
+            while(iterador.hasNext()) {
+            	int elemento = iterador.next();
+                matrizQ[elemento - 1][i - 1] = 1;
+                pair <Integer,Double> parejaAdiccionar = new pair< Integer , Double >(i,(PROBABILIDAD_TELEPORTACION / numeroAristas) + ((1 - PROBABILIDAD_TELEPORTACION) / NUMERO_DE_NODOS));
+                vectorMatrizA.get(elemento).add(parejaAdiccionar);
+                /*if (mapMatrizA.containsKey(elemento)) {
 //					 if(mapMatrizA.get(i).containsKey(key)){
 //						 mapMatrizA.get(i).put(key, beetaTimesM + oneMinBetaOverN);
 //					 }else{
@@ -109,13 +128,13 @@ public class PageRank {
 //						 mapMatrizA.put(i, m);
 //					 }
                     // A = BM + (1-B)/N
-                    mapMatrizA.get(j).put(i, (PROBABILIDAD_TELEPORTACION / numeroAristas) + ((1 - PROBABILIDAD_TELEPORTACION) / NUMERO_DE_NODOS));
+                    mapMatrizA.get(elemento).put(i, (PROBABILIDAD_TELEPORTACION / numeroAristas) + ((1 - PROBABILIDAD_TELEPORTACION) / NUMERO_DE_NODOS));
                 } else {
                     Map<Integer, Double> m = new HashMap<>();
                     // A = BM + (1-B)/N
                     m.put(i, (PROBABILIDAD_TELEPORTACION / numeroAristas) + (1 - PROBABILIDAD_TELEPORTACION) / NUMERO_DE_NODOS);
-                    mapMatrizA.put(j, m);
-                }
+                    mapMatrizA.put(elemento, m);
+                }*/
             }
         }
 
@@ -128,8 +147,7 @@ public class PageRank {
             System.out.println();
         }
 
-        System.out.println("Mapeo Matrix A: " + mapMatrizA);
-        mapAristasNodo = null;
+        System.out.println("Mapeo Matrix A: " + vectorMatrizA);
 
         double[] arrayR = new double[NUMERO_DE_NODOS];
         Arrays.fill(arrayR, (1.0 / NUMERO_DE_NODOS));
@@ -143,21 +161,20 @@ public class PageRank {
             System.out.println("Iteracion Metodo Potencia: " + (i + 1));
             //System.out.println("Iteracion Metodo Potencia: " + (i + 1));
             for (int k = 0; k < arrayR.length; k++) {
-                Map<Integer, Double> m = new HashMap<>();
-                if (mapMatrizA.containsKey(k)) {
-                    m = mapMatrizA.get(k);
-
+                Vector< pair<Integer,Double> > m = new Vector< pair<Integer,Double> >();
+                if (vectorMatrizA.contains(k)) {
+                    m = vectorMatrizA.get(k);
                 }
 
                 double rank = 0;
                 for (int j = 0; j < arrayR.length; j++) {
                     double elementoMatriz = 0;
-                    if (!m.containsKey(j)) {
+                    if (!m.contains(j)) {
                         elementoMatriz =  (1 - PROBABILIDAD_TELEPORTACION) / NUMERO_DE_NODOS; // 0 + (1-B)/N
                     System.out.println(elementoMatriz);
                     } else {
-                        elementoMatriz = m.get(j);
-                        matrizA[k - 1][j - 1] = m.get(j);
+                        elementoMatriz = m.get(j).second();
+                        matrizA[k - 1][j - 1] = m.get(j).second();
                     }
                     rank += elementoMatriz * arrayR[j];
                 }
@@ -173,16 +190,15 @@ public class PageRank {
 
         for (int i = 0; i < matrizQ.length; i++) {
             for (int j = 0; j < matrizA[i].length; j++) {
-             //   System.out.print(String.format( "%.2f", matrizA[i][j] ) + "  ");
+                System.out.print(String.format( "%.2f", matrizA[i][j] ) + "  ");
             }
-           // System.out.println();
+            System.out.println();
         }
 
         System.out.println("Vector Ranking: ");
 
         for (int i = 0; i < NUMERO_DE_NODOS; i++) {
             System.out.println("Pagina " + (i + 1) + " :" + vectorRanking[i]);
-        }
+        } 
     }
-
 }

@@ -137,10 +137,14 @@ public class PageRank {
 
         double[] vectorRanking = new double[NUMERO_DE_NODOS];
 
-        for (int iteration = 0; iteration < ITERACIONES_METODO_POTENCIA; iteration++) {
+        for (int i = 0; i < ITERACIONES_METODO_POTENCIA; i++) {
             // MULTIPLICANDO A x R (METODO POTENCIA)
+<<<<<<< Updated upstream
             System.out.println("_________________________________");
             System.out.println("Iteracion Metodo Potencia: " + (iteration + 1));
+=======
+            //System.out.println("Iteracion Metodo Potencia: " + (i + 1));
+>>>>>>> Stashed changes
             for (int k = 0; k < arrayR.length; k++) {
                 Map<Integer, Double> m = new HashMap<>();
                 if (mapMatrizA.containsKey(k)) {
@@ -152,7 +156,8 @@ public class PageRank {
                 for (int j = 0; j < arrayR.length; j++) {
                     double elementoMatriz = 0;
                     if (!m.containsKey(j)) {
-                        elementoMatriz = (1.0 / NUMERO_DE_NODOS) * (1 - PROBABILIDAD_TELEPORTACION);
+                        elementoMatriz =  (1 - PROBABILIDAD_TELEPORTACION) / NUMERO_DE_NODOS; // 0 + (1-B)/N
+                    System.out.println(elementoMatriz);
                     } else {
                         elementoMatriz = m.get(j);
                         matrizA[k - 1][j - 1] = m.get(j);

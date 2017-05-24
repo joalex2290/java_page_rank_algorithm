@@ -1,5 +1,8 @@
+<<<<<<< Updated upstream
 # PSEUDOCODIGO #
 
+=======
+>>>>>>> Stashed changes
 Algoritmo PageRank
 
 teleportacion = 0.85;

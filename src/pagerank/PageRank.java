@@ -35,10 +35,7 @@
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Vector;
 import java.util.BitSet;
 import java.util.Collections;
@@ -58,7 +55,7 @@ class pair < X, Y > {
 
 public class PageRank {
 
-    private static final String NOMBRE_ARCHIVO = "dataset.txt";
+    private static final String NOMBRE_ARCHIVO = "dataset2.txt";
     private static final double PROBABILIDAD_TELEPORTACION = 0.85;
     private static final int MAX_NODOS = 100000;
     private static int NODO_MAXIMO = 0;
@@ -101,7 +98,7 @@ public class PageRank {
         		NUMERO_DE_NODOS++;
         registroNumeros = null;
         System.out.println("Nodos: " + NUMERO_DE_NODOS);
-
+        System.out.println("NODO MAYOR: " + NODO_MAXIMO);
         double[][] matrizQ = new double[NODO_MAXIMO][NODO_MAXIMO];
         double[][] matrizA = new double[NODO_MAXIMO][NODO_MAXIMO];
         for (int i = 0; i < NODO_MAXIMO; i++) {
@@ -121,22 +118,6 @@ public class PageRank {
                 matrizQ[elemento - 1][i - 1] = 1;
                 pair <Integer,Double> parejaAdiccionar = new pair< Integer , Double >(i,(PROBABILIDAD_TELEPORTACION / numeroAristas) + ((1 - PROBABILIDAD_TELEPORTACION) / NUMERO_DE_NODOS));
                 vectorMatrizA.get(elemento).add(parejaAdiccionar);
-                /*if (mapMatrizA.containsKey(elemento)) {
-//					 if(mapMatrizA.get(i).containsKey(key)){
-//						 mapMatrizA.get(i).put(key, beetaTimesM + oneMinBetaOverN);
-//					 }else{
-//						 Map<Integer, Double> m = new HashMap<>();
-//						 m.put(key, beetaTimesM + oneMinBetaOverN);
-//						 mapMatrizA.put(i, m);
-//					 }
-                    // A = BM + (1-B)/N
-                    mapMatrizA.get(elemento).put(i, (PROBABILIDAD_TELEPORTACION / numeroAristas) + ((1 - PROBABILIDAD_TELEPORTACION) / NUMERO_DE_NODOS));
-                } else {
-                    Map<Integer, Double> m = new HashMap<>();
-                    // A = BM + (1-B)/N
-                    m.put(i, (PROBABILIDAD_TELEPORTACION / numeroAristas) + (1 - PROBABILIDAD_TELEPORTACION) / NUMERO_DE_NODOS);
-                    mapMatrizA.put(elemento, m);
-                }*/
             }
         }
 
@@ -144,9 +125,9 @@ public class PageRank {
 
         for (int i = 0; i < matrizQ.length; i++) {
             for (int j = 0; j < matrizQ[i].length; j++) {
-                System.out.print(matrizQ[i][j] + "  ");
+                //System.out.print(matrizQ[i][j] + "  ");
             }
-            System.out.println();
+            //System.out.println();
         }
 
         System.out.println("Mapeo Matrix A: ");
@@ -158,47 +139,44 @@ public class PageRank {
         	System.out.printf("Nodo: %d(", i);
         	while(iterador.hasNext()){
         		pair<Integer,Double> pareja = iterador.next();
-        		System.out.printf(" %d %.2f ", pareja.first(), pareja.second());
+        		System.out.printf(" %d %.4f ", pareja.first(), pareja.second());
         	}
         	System.out.printf(")\n");
         }
-
-        Vector<Double> arrayR = new Vector<Double>(NUMERO_DE_NODOS);
+        Vector<Double> arrayR = new Vector<Double>();
+        arrayR.setSize(NODO_MAXIMO);
         Collections.fill(arrayR, (1.0 / NUMERO_DE_NODOS));
         //NORMALIZANDO EL VECTOR R
 
         Vector<Double> vectorRanking = new Vector<Double>(NODO_MAXIMO);
+        vectorRanking.setSize(NODO_MAXIMO);
 
         for (int i = 0; i < ITERACIONES_METODO_POTENCIA; i++) {
             // MULTIPLICANDO A x R (METODO POTENCIA)
             System.out.println("_________________________________");
             System.out.println("Iteracion Metodo Potencia: " + (i + 1));
             //System.out.println("Iteracion Metodo Potencia: " + (i + 1));
-            for (int k = 0; k < arrayR.capacity(); k++) {
+            for (int k = 0; k < arrayR.size(); k++) {
                 Vector< pair<Integer,Double> > m = new Vector< pair<Integer,Double> >();
-                if (vectorMatrizA.get(k).size() > 0)
-                    m = vectorMatrizA.get(k);
-                else
-                	continue;
+                if (vectorMatrizA.get(k+1).size() > 0)
+                    m = vectorMatrizA.get(k+1);
                 
-
                 double rank = 0;
-                for (int j = 0; j < arrayR.capacity(); j++) {
+                for (int j = 0; j < arrayR.size(); j++) {
                     double elementoMatriz = 0;
-                    if (!m.contains(j)) {
+                    if (!contiene(m,j)) {
                         elementoMatriz =  (1 - PROBABILIDAD_TELEPORTACION) / NUMERO_DE_NODOS; // 0 + (1-B)/N
-                    System.out.println(elementoMatriz);
+                        //System.out.println("ELEMENTO MATRIZ " + elementoMatriz);
                     } else {
-                        elementoMatriz = m.(j).second();
-                        matrizA[k - 1][j - 1] = m.get(j).second();
+                        elementoMatriz = m.get(encontrarIndex(m,j)).second();
+                        matrizA[k][j - 1] = m.get(encontrarIndex(m,j)).second();
                     }
                     rank += elementoMatriz * arrayR.get(j);
                 }
                 vectorRanking.set(k, rank);
                 rank = 0;
-                System.out.println(vectorRanking.get(k));
+                //System.out.println(vectorRanking.get(k));
             }
-
             arrayR = vectorRanking;
         }
 
@@ -213,12 +191,27 @@ public class PageRank {
 
         System.out.println("Vector Ranking: ");
 
-        for (int i = 0; i < NUMERO_DE_NODOS; i++) {
+        for (int i = 0; i < NODO_MAXIMO; i++) {
             System.out.println("Pagina " + (i + 1) + " :" + vectorRanking.get(i));
         } 
     }
+    
+    static int encontrarIndex(Vector< pair<Integer,Double> > vectorABuscar, int elemento){
+    	for(int i = 0; i < vectorABuscar.size(); i++){
+    		if (vectorABuscar.get(i).first() == elemento)
+    			return i;
+    	}
+    	return -1;
+    }
 
-
+    static boolean contiene(Vector< pair<Integer,Double> > vectorABuscar, int elemento){
+    	for (int i = 0; i < vectorABuscar.size(); i++){
+    		if (vectorABuscar.get(i).first() == elemento)
+    			return true;
+    	}
+    	return false;
+    }
+    
 	static int max(int a, int b) {
 		return a > b ? a : b;
 	}

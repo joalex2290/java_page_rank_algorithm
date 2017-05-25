@@ -37,7 +37,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Iterator;
 import java.util.Vector;
-import java.util.BitSet;
 import java.util.Collections;
 
 class pair < X, Y > {
@@ -55,19 +54,17 @@ class pair < X, Y > {
 
 public class PageRank {
 
-    private static final String NOMBRE_ARCHIVO = "dataset2.txt";
+    private static final String NOMBRE_ARCHIVO = "dataset.txt";
+    //private static final String NOMBRE_ARCHIVO = "dataset2.txt";
     private static final double PROBABILIDAD_TELEPORTACION = 0.85;
     private static final int MAX_NODOS = 100000;
-    private static int NODO_MAXIMO = 0;
     private static final int ITERACIONES_METODO_POTENCIA = 4;
-    private static int NUMERO_DE_NODOS = 875713;
+    private static int NUMERO_DE_NODOS = 0;
     
 
     public static void main(String[] args) throws Exception {
         Vector< Vector<Integer> > vectorAristasNodo = new Vector< Vector<Integer> >(MAX_NODOS);
         Vector< Vector< pair< Integer , Double > > > vectorMatrizA = new Vector<Vector< pair< Integer,Double >>>(MAX_NODOS);
-        BitSet registroNumeros = new BitSet(MAX_NODOS);
-        registroNumeros.clear();
         
         for (int i = 0; i < MAX_NODOS; i++){
         	Vector< pair< Integer , Double > > NodoMatrizA = new Vector< pair< Integer , Double > >();
@@ -86,23 +83,14 @@ public class PageRank {
             int x = Integer.parseInt(splits[0]);
             int y = Integer.parseInt(splits[1]);
             vectorAristasNodo.get(x).add(y);
-            NODO_MAXIMO = max(NODO_MAXIMO,max(x,y));
-            registroNumeros.set(x, true);
-            registroNumeros.set(y, true);
+            NUMERO_DE_NODOS = max(NUMERO_DE_NODOS,max(x,y));
         }
         br.close();
-
-        NUMERO_DE_NODOS = 0;
-        for (int i = 0; i < MAX_NODOS; i++)
-        	if (registroNumeros.get(i) == true)
-        		NUMERO_DE_NODOS++;
-        registroNumeros = null;
         System.out.println("Nodos: " + NUMERO_DE_NODOS);
-        System.out.println("NODO MAYOR: " + NODO_MAXIMO);
-        double[][] matrizQ = new double[NODO_MAXIMO][NODO_MAXIMO];
-        double[][] matrizA = new double[NODO_MAXIMO][NODO_MAXIMO];
-        for (int i = 0; i < NODO_MAXIMO; i++) {
-            for (int j = 0; j < NODO_MAXIMO; j++) {
+        double[][] matrizQ = new double[NUMERO_DE_NODOS][NUMERO_DE_NODOS];
+        double[][] matrizA = new double[NUMERO_DE_NODOS][NUMERO_DE_NODOS];
+        for (int i = 0; i < NUMERO_DE_NODOS; i++) {
+            for (int j = 0; j < NUMERO_DE_NODOS; j++) {
                 matrizQ[i][j] = 0;
                 matrizA[i][j] = 0;
             }
@@ -144,12 +132,12 @@ public class PageRank {
         	System.out.printf(")\n");
         }
         Vector<Double> arrayR = new Vector<Double>();
-        arrayR.setSize(NODO_MAXIMO);
+        arrayR.setSize(NUMERO_DE_NODOS);
         Collections.fill(arrayR, (1.0 / NUMERO_DE_NODOS));
         //NORMALIZANDO EL VECTOR R
 
-        Vector<Double> vectorRanking = new Vector<Double>(NODO_MAXIMO);
-        vectorRanking.setSize(NODO_MAXIMO);
+        Vector<Double> vectorRanking = new Vector<Double>(NUMERO_DE_NODOS);
+        vectorRanking.setSize(NUMERO_DE_NODOS);
 
         for (int i = 0; i < ITERACIONES_METODO_POTENCIA; i++) {
             // MULTIPLICANDO A x R (METODO POTENCIA)
@@ -191,7 +179,7 @@ public class PageRank {
 
         System.out.println("Vector Ranking: ");
 
-        for (int i = 0; i < NODO_MAXIMO; i++) {
+        for (int i = 0; i < NUMERO_DE_NODOS; i++) {
             System.out.println("Pagina " + (i + 1) + " :" + vectorRanking.get(i));
         } 
     }

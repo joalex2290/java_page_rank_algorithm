@@ -61,8 +61,10 @@ class pair < X, Y > {
 //Clase PageRank que se encarga de rankear una serie de páginas
 public class PageRank {
 
-    private static final String NOMBRE_ARCHIVO = "dataset.txt";//Archivos de carga 1
+    //private static final String NOMBRE_ARCHIVO = "dataset.txt";//Archivos de carga 1
     //private static final String NOMBRE_ARCHIVO = "dataset2.txt";//Archivos de carga 2
+    //private static final String NOMBRE_ARCHIVO = "dataset3.txt";//Archivos de carga 3
+    private static final String NOMBRE_ARCHIVO = "dataset4.txt";//Archivos de carga 4
     private static final double PROBABILIDAD_TELEPORTACION = 0.85;//Valor seleccionado arbitratiamente
     private static final int MAX_NODOS = 100000;//Cantidad máxima de nodos
     private static final int ITERACIONES_METODO_POTENCIA = 4;//Iteracciones del método de la potencia
@@ -215,9 +217,15 @@ public class PageRank {
      // Imprimimos los rankeos en orden
         for (int i = 0; i < NUMERO_DE_NODOS; i++) {
             System.out.println("Pagina " + (i + 1) + " :" + vectorRanking.get(i));
+        }
+        Vector<Double> vectorOrdenado = new Vector<Double>(vectorRanking);
+        Collections.sort(vectorOrdenado);
+        System.out.println("Top 10");
+        for (int i = NUMERO_DE_NODOS-1; i > NUMERO_DE_NODOS-11; i--) {
+        	System.out.println("Pagina " + (vectorRanking.indexOf(vectorOrdenado.get(i)) + 1) + " :" + vectorOrdenado.get(i));
         } 
     }
- // Encuentra el index de un elemento en un vector
+// Encuentra el index de un elemento en un vector
     static int encontrarIndex(Vector< pair<Integer,Double> > vectorABuscar, int elemento){
     	for(int i = 0; i < vectorABuscar.size(); i++){
     		if (vectorABuscar.get(i).first() == elemento)
